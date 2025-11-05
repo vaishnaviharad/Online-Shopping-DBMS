@@ -1,0 +1,181 @@
+
+mysql> CREATE DATABASE Online_Shopping_System;
+Query OK, 1 row affected (0.212 sec)
+
+mysql> USE Online_Shopping_System;
+Database changed
+mysql> CREATE TABLE Customer (
+    ->   customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   username VARCHAR(50) NOT NULL UNIQUE,
+    ->   first_name VARCHAR(100),
+    ->   last_name VARCHAR(100),
+    ->   password VARCHAR(255) NOT NULL,
+    ->   address VARCHAR(255),
+    ->   email_id VARCHAR(100) UNIQUE
+    -> );
+Query OK, 0 rows affected (0.581 sec)
+
+mysql> CREATE TABLE Category (
+    ->   category_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   category_name VARCHAR(100) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.238 sec)
+
+mysql> CREATE TABLE Products (
+    ->   p_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   category_id INT,
+    ->   p_name VARCHAR(150) NOT NULL,
+    ->   p_model VARCHAR(100),
+    ->   p_price DECIMAL(10,2) NOT NULL,
+    ->   FOREIGN KEY (category_id) REFERENCES Category(category_id)
+    -> );
+Query OK, 0 rows affected (0.369 sec)
+
+mysql> CREATE TABLE Cart (
+    ->   cart_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   customer_id INT,
+    ->   total_amount DECIMAL(10,2),
+    ->   FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+    -> );
+Query OK, 0 rows affected (0.274 sec)
+
+mysql> CREATE TABLE Cart_Item (
+    ->   cart_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   cart_id INT,
+    ->   p_id INT,
+    ->   quantity INT DEFAULT 1,
+    ->   total_cost DECIMAL(10,2),
+    ->   FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
+    ->   FOREIGN KEY (p_id) REFERENCES Products(p_id)
+    -> );
+Query OK, 0 rows affected (1.855 sec)
+
+mysql> CREATE TABLE Payment (
+    ->   payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   cart_id INT,
+    ->   amount DECIMAL(10,2),
+    ->   payment_type ENUM('Credit Card','Debit Card','UPI','Net Banking'),
+    ->   FOREIGN KEY (cart_id) REFERENCES Cart(cart_id)
+    -> );
+Query OK, 0 rows affected (0.457 sec)
+
+mysql> CREATE TABLE Online_Shopping (
+    ->   shopping_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->   customer_id INT,
+    ->   category_id INT,
+    ->   FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    ->   FOREIGN KEY (category_id) REFERENCES Category(category_id)
+    -> );
+Query OK, 0 rows affected (0.471 sec)
+
+mysql> -- Customers
+Query OK, 0 rows affected (0.044 sec)
+
+mysql> INSERT INTO Customer (username, first_name, last_name, password, address, email_id)
+    -> VALUES
+    -> ('vaishnavi', 'Vaishnavi', 'Harad', '123Passion', 'Pune', 'vharad@gmail.com'),
+    -> ('raj123', 'Raj', 'Patil', 'rajpass', 'Mumbai', 'raj@gmail.com');
+Query OK, 2 rows affected (0.196 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> -- Categories
+Query OK, 0 rows affected (0.006 sec)
+
+mysql> INSERT INTO Category (category_name)
+    -> VALUES ('Electronics'), ('Clothing'), ('Books');
+Query OK, 3 rows affected (0.071 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> -- Products
+Query OK, 0 rows affected (0.006 sec)
+
+mysql> INSERT INTO Products (category_id, p_name, p_model, p_price)
+    -> VALUES
+    -> (1, 'Mobile', 'Samsung A15', 12000),
+    -> (1, 'Laptop', 'HP Pavilion', 55000),
+    -> (2, 'Shirt', 'Cotton XL', 700);
+Query OK, 3 rows affected (0.067 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> -- Carts
+Query OK, 0 rows affected (0.005 sec)
+
+mysql> INSERT INTO Cart (customer_id, total_amount) VALUES (1, 0);
+Query OK, 1 row affected (0.059 sec)
+
+mysql>
+mysql> -- Add Cart Items
+Query OK, 0 rows affected (0.004 sec)
+
+mysql> INSERT INTO Cart_Item (cart_id, p_id, quantity, total_cost)
+    -> VALUES (1, 1, 1, 12000);
+Query OK, 1 row affected (0.066 sec)
+
+mysql> -- View customers
+Query OK, 0 rows affected (0.010 sec)
+
+mysql> SELECT * FROM Customer;
++-------------+-----------+------------+-----------+------------+---------+------------------+
+| customer_id | username  | first_name | last_name | password   | address | email_id         |
++-------------+-----------+------------+-----------+------------+---------+------------------+
+|           1 | vaishnavi | Vaishnavi  | Harad     | 123Passion | Pune    | vharad@gmail.com |
+|           2 | raj123    | Raj        | Patil     | rajpass    | Mumbai  | raj@gmail.com    |
++-------------+-----------+------------+-----------+------------+---------+------------------+
+2 rows in set (0.010 sec)
+
+mysql>
+mysql> -- View products with category
+Query OK, 0 rows affected (0.007 sec)
+
+mysql> SELECT p.p_name, p.p_price, c.category_name
+    -> FROM Products p
+    -> JOIN Category c ON p.category_id = c.category_id;
++--------+----------+---------------+
+| p_name | p_price  | category_name |
++--------+----------+---------------+
+| Mobile | 12000.00 | Electronics   |
+| Laptop | 55000.00 | Electronics   |
+| Shirt  |   700.00 | Clothing      |
++--------+----------+---------------+
+3 rows in set (0.012 sec)
+
+mysql>
+mysql> -- View cart items with product details
+Query OK, 0 rows affected (0.008 sec)
+
+mysql> SELECT ci.cart_id, p.p_name, ci.quantity, ci.total_cost
+    -> FROM Cart_Item ci
+    -> JOIN Products p ON ci.p_id = p.p_id;
++---------+--------+----------+------------+
+| cart_id | p_name | quantity | total_cost |
++---------+--------+----------+------------+
+|       1 | Mobile |        1 |   12000.00 |
++---------+--------+----------+------------+
+1 row in set (0.016 sec)
+
+mysql>
+mysql> -- View payment details
+Query OK, 0 rows affected (0.007 sec)
+
+mysql> SELECT * FROM Payment;
+Empty set (0.032 sec)
+
+mysql> Query OK, 0 rows affected (0.007 sec)
+    ->
+    -> bjj
+    -> USE Online_Shopping_System;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Query OK, 0 rows affected (0.007 sec)
+
+bjj
+USE Online_Shopping_System' at line 1
+mysql> SELECT * FROM Customer;
++-------------+-----------+------------+-----------+------------+---------+------------------+
+| customer_id | username  | first_name | last_name | password   | address | email_id         |
++-------------+-----------+------------+-----------+------------+---------+------------------+
+|           1 | vaishnavi | Vaishnavi  | Harad     | 123Passion | Pune    | vharad@gmail.com |
+|           2 | raj123    | Raj        | Patil     | rajpass    | Mumbai  | raj@gmail.com    |
++-------------+-----------+------------+-----------+------------+---------+------------------+
+2 rows in set (0.015 sec)
